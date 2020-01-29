@@ -23,7 +23,7 @@ require_once __DIR__ . "/../../thirdparty/twitteroauth/twitteroauth/twitteroauth
  */
 class TwitterService implements ITwitterService
 {
-    
+
     /**
      * Use https for inserted media (prevents mixed content warnings on SSL websites)
      *
@@ -49,18 +49,23 @@ class TwitterService implements ITwitterService
 
     public function getTweets($user, $count)
     {
-
         // Check user
         if (empty($user)) {
             return null;
         }
 
         // Call rest api
+        $tweetMode = 'default';
+        if( SiteConfig::current_site_config()->TwitterEnableExtendedMode ){
+            $tweetMode = 'extended';
+        }
+
         $arguments = http_build_query(array(
             'screen_name' => $user,
             'count' => $count,
             'include_rts' => SiteConfig::current_site_config()->TwitterIncludeRTs,
-            'exclude_replies' => SiteConfig::current_site_config()->TwitterExcludeReplies
+            'exclude_replies' => SiteConfig::current_site_config()->TwitterExcludeReplies,
+            'tweet_mode' => $tweetMode
         ));
         $connection = $this->getConnection();
         $response = $connection->get("https://api.twitter.com/1.1/statuses/user_timeline.json?$arguments");
@@ -75,7 +80,7 @@ class TwitterService implements ITwitterService
 
         return $tweets;
     }
-    
+
     /**
      * get favourite tweets associated with the user.
      * @param string $user
@@ -120,7 +125,7 @@ class TwitterService implements ITwitterService
             ));
             $connection = $this->getConnection();
             $response = $connection->get("https://api.twitter.com/1.1/search/tweets.json?$arguments");
-        
+
             // Parse all tweets
             if ($response) {
                 foreach ($response->statuses as $tweet) {
@@ -128,7 +133,7 @@ class TwitterService implements ITwitterService
                 }
             }
         }
-    
+
         return $tweets;
     }
 
@@ -155,7 +160,7 @@ class TwitterService implements ITwitterService
             60 => 'min',
             1 => 'sec'
         );
-        
+
         $items = array();
 
         foreach ($periods as $seconds => $description) {
@@ -163,7 +168,7 @@ class TwitterService implements ITwitterService
             if (count($items) >= $detail) {
                 break;
             }
-            
+
             // If this is the last element in the chain, round the value.
             // Otherwise, take the floor of the time difference
             $quantity = $difference / $seconds;
@@ -172,12 +177,12 @@ class TwitterService implements ITwitterService
             } else {
                 $quantity = intval($quantity);
             }
-            
+
             // Check that the current period is smaller than the current time difference
             if ($quantity <= 0) {
                 continue;
             }
-            
+
             // Append period to total items and continue calculation with remainder
             if ($quantity !== 1) {
                 $description .= 's';
@@ -205,7 +210,7 @@ class TwitterService implements ITwitterService
         $profileLink = "https://twitter.com/" . Convert::raw2url($tweet->user->screen_name);
         $tweetID = $tweet->id_str;
         $https = ( Config::inst()->get(get_class(), "use_https") ? "_https" : "" );
-        
+
         //
         // Date format.
         //
@@ -277,14 +282,14 @@ class TwitterService implements ITwitterService
             Convert::raw2att($entity->sizes->small->w),
             Convert::raw2att($entity->sizes->small->h)
         );
-        
+
         // now empty-out the preceding tokens
         for ($i = $startPos; $i < $endPos;
-        $i++) {
+             $i++) {
             $tokens[$i] = '';
         }
     }
-    
+
     /**
      * Parse the tweet object into a HTML block
      *
@@ -293,7 +298,15 @@ class TwitterService implements ITwitterService
      */
     protected function parseText($tweet)
     {
-        $rawText = $tweet->text;
+
+        if( isset($tweet->retweeted_status) ) {
+            $tweet = $tweet->retweeted_status;
+        }
+        if( isset($tweet->full_text) ){
+            $rawText = $tweet->full_text;
+        } else {
+            $rawText = $tweet->text;
+        }
 
         // tokenise into words for parsing (multibyte safe)
         $tokens = preg_split('/(?<!^)(?!$)/u', $rawText);

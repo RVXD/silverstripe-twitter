@@ -16,7 +16,7 @@ use SilverStripe\ORM\DataExtension;
  */
 class TwitterSiteConfig extends DataExtension
 {
-    
+
     private static $db = array(
         'TwitterUsername' => 'Varchar(255)',
         'TwitterAppConsumerKey' => 'Varchar(255)',
@@ -24,12 +24,13 @@ class TwitterSiteConfig extends DataExtension
         'TwitterAppAccessToken' => 'Varchar(255)',
         'TwitterAppAccessSecret' => 'Varchar(255)',
         'TwitterIncludeRTs' => 'Boolean',
-        'TwitterExcludeReplies' => 'Boolean'
+        'TwitterExcludeReplies' => 'Boolean',
+        'TwitterEnableExtendedMode' => 'Boolean'
     );
-    
+
     public function updateCMSFields(FieldList $fields)
     {
-        
+
         // Twitter setup
         $fields->addFieldsToTab('Root.TwitterApp', array(
             $userNameField = new TextField('TwitterUsername', _t('TwitterSiteConfig.FIELD_TWITTER_USERNAME', 'Twitter Username'), null, 255),
@@ -38,7 +39,8 @@ class TwitterSiteConfig extends DataExtension
             new TextField('TwitterAppAccessToken', _t('TwitterSiteConfig.FIELD_ACCESS_TOKEN', 'Access Token'), null, 255),
             new TextField('TwitterAppAccessSecret', _t('TwitterSiteConfig.FIELD_ACCESS_SECRET', 'Access Secret'), null, 255),
             new CheckboxField('TwitterIncludeRTs', _t('TwitterSiteConfig.FIELD_INCLUDE_RTS', 'Include RTs in feed')),
-            new CheckboxField('TwitterExcludeReplies', _t('TwitterSiteConfig.FIELD_EXCLUDE_REPLIES', 'Exclude replies in feed'))
+            new CheckboxField('TwitterExcludeReplies', _t('TwitterSiteConfig.FIELD_EXCLUDE_REPLIES', 'Exclude replies in feed')),
+            new CheckboxField('TwitterEnableExtendedMode', _t('TwitterSiteConfig.FIELD_ENABLE_EXTENDED', 'Enable extended tweet mode'))
         ));
         $userNameField->setDescription(_t('TwitterSiteConfig.FIELD_TWITTER_USERNAME_DESCRIPTION', 'Leave blank to disable twitter'));
     }

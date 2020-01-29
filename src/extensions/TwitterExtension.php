@@ -44,7 +44,7 @@ class TwitterExtension extends Extension
         $latestTweets = $this->LatestTweets();
         return $latestTweets ? $latestTweets->first() : null;
     }
-    
+
     /**
      * Retrieves (up to) the last $count tweets.
      *
@@ -58,8 +58,8 @@ class TwitterExtension extends Extension
         $user = SiteConfig::current_site_config()->TwitterUsername;
         return $this->LatestTweetsUser($user, $count);
     }
-    
-    
+
+
     /**
      * Retrieves (up to) the last $count favourite tweets.
      *
@@ -71,10 +71,10 @@ class TwitterExtension extends Extension
     public function Favorites($count = 4)
     {
         $user = SiteConfig::current_site_config()->TwitterUsername;
-        
+
         return new ArrayList($this->twitterService->getFavorites($user, $count));
     }
-    
+
     /**
      * Converts an array of tweets into a template-compatible format
      *
@@ -103,16 +103,16 @@ class TwitterExtension extends Extension
      */
     public function LatestTweetsUser($user, $count = 10)
     {
-        
+
         // Check that the twitter user is configured
         if (empty($user)) {
             return null;
         }
-        
+
         $tweets = $this->twitterService->getTweets($user, $count);
         return $this->viewableTweets($tweets);
     }
-    
+
     /**
      * Retrieves (up to) the last $count tweets searched by the $query
      *
@@ -127,7 +127,7 @@ class TwitterExtension extends Extension
         if (empty($query)) {
             return null;
         }
-        
+
         $tweets = $this->twitterService->searchTweets($query, $count);
         return $this->viewableTweets($tweets);
     }
